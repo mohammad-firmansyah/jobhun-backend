@@ -15,6 +15,66 @@ var (
 	mysql      *sql.DB
 )
 
+func createJurusan(c *fiber.Ctx) error {
+	jurusan := new(database.Jurusan)
+
+	err := c.BodyParser(&jurusan)
+
+	if err != nil {
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
+			"errors": err.Error(),
+		})
+
+	}
+
+	validate := validator.New()
+	err = validate.Struct(jurusan)
+	if err != nil {
+		c.Status(404).JSON(&fiber.Map{
+			"error": err.Error(),
+		})
+		return nil
+	}
+
+	_, err = mysql.Exec(`INSERT INTO jurusan
+      VALUES ('','` + jurusan.NamaJurusan + `')`)
+
+	if err != nil {
+		panic(err)
+	}
+
+	c.Status(200).JSON(&fiber.Map{
+		"jurusan": jurusan,
+	})
+
+	return nil
+}
+
+func readJurusans(c *fiber.Ctx) error {
+
+	rows, err := mysql.Query("SELECT * FROM jurusan")
+	var listJurusan []database.Jurusan
+	if err != nil {
+		panic(err)
+	}
+
+	for rows.Next() {
+		var jurusan database.Jurusan
+
+		err := rows.Scan(&jurusan.ID, &jurusan.NamaJurusan)
+		if err != nil {
+			panic(err)
+		}
+
+		listJurusan = append(listJurusan, jurusan)
+	}
+
+	c.Status(200).JSON(&fiber.Map{
+		"jurusan": listJurusan,
+	})
+	return nil
+}
+
 func createMahasiswa(c *fiber.Ctx) error {
 	mahasiswa := new(database.Mahasiswa)
 
@@ -419,5 +479,14 @@ func SetupRoute(db *sql.DB) *fiber.App {
 	app.Get("/api/v1/mahasiswa", readMahasiswas)
 	app.Put("/api/v1/mahasiswa/:id", updateMahasiswa)
 	app.Delete("/api/v1/mahasiswa/:id", deleteMahasiswa)
+
+	// jurusan
+	app.Post("/api/v1/jurusan", createJurusan)
+	app.Get("/api/v1/jurusan", readJurusans)
+
+	// Hobi
+	app.Post("/api/v1/jurusan", createHobi)
+	app.Get("/api/v1/jurusan", readHobis)
+
 	return &app
 }

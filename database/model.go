@@ -12,12 +12,12 @@ type Mahasiswa struct {
 
 type Hobi struct {
 	ID       string `json:"id"`
-	NamaHobi string `json:"nama_hobi"`
+	NamaHobi string `json:"nama_hobi" validate:"required"`
 }
 
 type Jurusan struct {
 	ID          string `json:"id"`
-	NamaJurusan string `json:"nama_jurusan"`
+	NamaJurusan string `json:"nama_jurusan" validate:"required"`
 }
 
 type MahasiswaHobi struct {
