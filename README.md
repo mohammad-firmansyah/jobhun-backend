@@ -1,7 +1,7 @@
 
 # Jobhun Academy 
 
-Intern test for as backend developer at jobhun.id
+Intern test as backend developer at jobhun.id
 
 
 ## Installation
