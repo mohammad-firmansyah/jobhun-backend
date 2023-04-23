@@ -36,13 +36,16 @@ func createJurusan(c *fiber.Ctx) error {
 		return nil
 	}
 
-	_, err = mysql.Exec(`INSERT INTO jurusan
+	data, err := mysql.Exec(`INSERT INTO jurusan
       VALUES ('','` + jurusan.NamaJurusan + `')`)
 
 	if err != nil {
 		panic(err)
 	}
 
+	id_jurusan, err := data.LastInsertId()
+
+	jurusan.ID = strconv.FormatInt(id_jurusan, 10)
 	c.Status(200).JSON(&fiber.Map{
 		"jurusan": jurusan,
 	})
@@ -71,6 +74,70 @@ func readJurusans(c *fiber.Ctx) error {
 
 	c.Status(200).JSON(&fiber.Map{
 		"jurusan": listJurusan,
+	})
+	return nil
+}
+
+func createHobi(c *fiber.Ctx) error {
+	hobi := new(database.Hobi)
+
+	err := c.BodyParser(&hobi)
+
+	if err != nil {
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{
+			"errors": err.Error(),
+		})
+
+	}
+
+	validate := validator.New()
+	err = validate.Struct(hobi)
+	if err != nil {
+		c.Status(404).JSON(&fiber.Map{
+			"error": err.Error(),
+		})
+		return nil
+	}
+
+	data, err := mysql.Exec(`INSERT INTO hobi
+      VALUES ('','` + hobi.NamaHobi + `')`)
+
+	if err != nil {
+		panic(err)
+	}
+
+	id_hobi, err := data.LastInsertId()
+
+	hobi.ID = strconv.FormatInt(id_hobi, 10)
+
+	c.Status(200).JSON(&fiber.Map{
+		"hobi": hobi,
+	})
+
+	return nil
+}
+
+func readHobis(c *fiber.Ctx) error {
+
+	rows, err := mysql.Query("SELECT * FROM hobi")
+	var listHobi []database.Hobi
+	if err != nil {
+		panic(err)
+	}
+
+	for rows.Next() {
+		var hobi database.Hobi
+
+		err := rows.Scan(&hobi.ID, &hobi.NamaHobi)
+		if err != nil {
+			panic(err)
+		}
+
+		listHobi = append(listHobi, hobi)
+	}
+
+	c.Status(200).JSON(&fiber.Map{
+		"hobi": listHobi,
 	})
 	return nil
 }
@@ -485,8 +552,8 @@ func SetupRoute(db *sql.DB) *fiber.App {
 	app.Get("/api/v1/jurusan", readJurusans)
 
 	// Hobi
-	app.Post("/api/v1/jurusan", createHobi)
-	app.Get("/api/v1/jurusan", readHobis)
+	app.Post("/api/v1/hobi", createHobi)
+	app.Get("/api/v1/hobi", readHobis)
 
 	return &app
 }
