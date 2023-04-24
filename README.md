@@ -85,7 +85,7 @@ Postman : https://www.postman.com/science-technologist-7222748/workspace/mohamma
 | :-------- | :------- | :-------------------------------- |
 | `nama_jurusan`      | `string` | **Required**. name of major |
 
-#### Get all jurusan
+#### Get all hobi
 ```http
   GET /api/v1/hobi
 ```
